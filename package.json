@@ -1,0 +1,20 @@
+{
+  "name": "mock-socket",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ava": "^5.2.0",
+    "jest-extended": "^3.2.4",
+    "mock-socket": "^9.2.1"
+  },
+  "devDependencies": {
+    "jest": "^29.4.3"
+  }
+}
