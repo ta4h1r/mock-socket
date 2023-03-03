@@ -6,6 +6,8 @@ class ClientApp {
     this.connection = new WebSocket(url);
 
     this.connection.onmessage = (event) => {
+      // Whenever the client receives a message
+      console.log("RECEIVED MESSAGE FROM SOCKET");
       this.messages.push(event.data);
     };
   }
@@ -21,19 +23,38 @@ test("that chat app can be mocked", (done) => {
 
   // Define server behaviour
   mockServer.on("connection", (socket) => {
-    socket.on("message", (data) => {
-      expect(data).toBe("test message from app");  
-      socket.send("test message from mock server");
+    socket.on("message", (message) => {
+      // Whenever the server receives a message
+      console.log("RECEIVED MESSAGE FROM CLIENT");
+      if (message) {
+        const type = JSON.parse(message).type;
+        switch (type) {
+          case "getTestResourceChanges":
+            socket.send(message); // We just send the same message back to the client (for now)
+            break;
+          default:
+            socket.send(null);
+        }
+      }
     });
   });
 
   const app = new ClientApp(fakeURL);
-  app.sendMessage("test message from app"); // NOTE: this line creates a micro task
+  const getTestResourceChangesMsg = {
+    type: "getTestResourceChanges",
+    requestId: 3,
+    resources: {},
+  };
+  app.sendMessage(JSON.stringify(getTestResourceChangesMsg));
 
-  // NOTE: this timeout is for creating another micro task that will happen after the above one
+
   setTimeout(() => {
-    expect(app.messages.length).toBe(1); 
-    expect(app.messages[0]).toBe("test message from mock server");
+    const messages = app.messages.map(msg => JSON.parse(msg)); 
+    console.log({messages});
+
+    expect(messages.length).toBe(1)
+    expect(messages[0].type).toBe("getTestResourceChanges");
+    
     mockServer.stop(done);
   }, 100);
 });
